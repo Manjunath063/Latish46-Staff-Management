@@ -1,0 +1,51 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:13
+    container_name: staff_postgres_046
+    ports:
+      - "5485:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin123
+      POSTGRES_DB: staff_management
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - staff-net
+
+  backend:
+    build: ./Backend
+    container_name: staff_backend_046
+    ports:
+      - "3085:3085"
+    depends_on:
+      - postgres
+    environment:
+      DB_USER: postgres
+      DB_PASSWORD: admin123
+      DB_HOST: postgres
+      DB_NAME: staff_management
+      DB_PORT: 5432
+    networks:
+      - staff-net
+
+  hr-staff:
+    build: ./HR-Staffmanagement
+    container_name: staff_hr_ui_046
+    ports:
+      - "8171:80"
+    depends_on:
+      - backend
+      - postgres
+    networks:
+      - staff-net
+
+volumes:
+  postgres_data:
+
+networks:
+  staff-net:
+
